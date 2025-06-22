@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>本の編集 - 読書ログアプリ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+   body {
+      background-color: #f3f4f6; /* bg-gray-100 の色 */
+      color: #1f2937;           /* text-gray-800 の色 */
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+  <!-- ヘッダー部分 -->
+  <header class="bg-blue-600 text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold rounded-md py-1 px-2">読書ログ</h1>
+      <nav>
+        <%= link_to '本の登録', new_book_path, class: "bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-lg transition duration-300 ease-in-out" %>
+      </nav>
+    </div>
+  </header>
+
+  <!-- フラッシュメッセージ表示エリア -->
+  <% if flash[:notice] || flash[:alert] %>
+    <div id="flash-message" class="container mx-auto mt-4 px-4">
+      <div class="<%= flash[:notice] ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700' %> border px-4 py-3 rounded-md relative" role="alert">
+        <strong class="font-bold"><%= flash[:notice] ? '成功！' : 'エラー！' %></strong>
+        <span class="block sm:inline"><%= flash[:notice] || flash[:alert] %></span>
+        <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.parentElement.style.display='none'">
+          <svg class="fill-current h-6 w-6 <%= flash[:notice] ? 'text-green-500' : 'text-red-500' %>" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+        </span>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- メインコンテンツエリア -->
+  <main class="container mx-auto mt-8 flex-grow p-4">
+    <section id="editBookForm" class="bg-white p-6 rounded-lg shadow-xl">
+      <h2 class="text-3xl font-semibold mb-6 text-gray-700">本の編集</h2>
+
+      <!-- エラーメッセージ表示 -->
+      <% if @book.errors.any? %>
+        <div class="text-red-600 mb-4">
+          <ul class="list-disc list-inside bg-red-100 border border-red-400 p-3 rounded-md">
+            <% @book.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= form_with(model: @book, local: true, html: { class: "space-y-5" }) do |form| %>
+        <div>
+          <%= form.label :title, 'タイトル:', class: "block text-lg font-medium text-gray-700 mb-1" %>
+          <%= form.text_field :title, required: true, class: "mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= form.label :author, '著者:', class: "block text-lg font-medium text-gray-700 mb-1" %>
+          <%= form.text_field :author, required: true, class: "mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= form.label :read_date, '読了日:', class: "block text-lg font-medium text-gray-700 mb-1" %>
+          <%= form.date_field :read_date, required: true, class: "mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= form.label :rating, '評価 (1-5):', class: "block text-lg font-medium text-gray-700 mb-1" %>
+          <%= form.select :rating, options_for_select(1..5, @book.rating), prompt: '選択してください', required: true, class: "mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= form.label :thoughts, '感想:', class: "block text-lg font-medium text-gray-700 mb-1" %>
+          <%= form.text_area :thoughts, rows: 5, class: "mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="flex flex-wrap gap-4 mt-6">
+          <%= form.submit '更新', class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md shadow-lg transition duration-300 ease-in-out" %>
+          <%= link_to '詳細に戻る', book_path(@book), class: "bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-md shadow-lg transition duration-300 ease-in-out" %>
+        </div>
+      <% end %>
+    </section>
+  </main>
+
+  <!-- フッター -->
+  <footer class="bg-gray-700 text-white p-4 text-center mt-8">
+    <div class="container mx-auto">
+      <p>&copy; 2023 読書ログアプリ. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
